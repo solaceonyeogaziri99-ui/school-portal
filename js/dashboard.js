@@ -15,6 +15,68 @@ document.addEventListener('DOMContentLoaded', function () {
   const yearEl = document.getElementById('year');
   if (yearEl) { yearEl.textContent = new Date().getFullYear(); }
 
+  // ---- USER DATA POPULATION ----
+  // Try multiple common localStorage keys that a login/registration flow might use.
+  const _userKeys = ['currentUser', 'user', 'registeredUser', 'loggedInUser'];
+  let registeredUser = null;
+  for (const k of _userKeys) {
+    const raw = localStorage.getItem(k);
+    if (raw) {
+      try { registeredUser = JSON.parse(raw); } catch (e) { registeredUser = { name: raw }; }
+      break;
+    }
+  }
+
+  function _getInitials(name) {
+    if (!name) return '';
+    return name.split(' ').map(n => n[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+  }
+
+  function populateUser(u) {
+    if (!u) return;
+    const name = u.name || u.fullName || u.username || 'User';
+    const reg = u.regNo || u.studentId || u.id || '';
+    const dept = u.department || u.dept || u.course || '';
+    const email = u.email || '';
+    const phone = u.phone || u.tel || '';
+    const faculty = u.faculty || u.school || '';
+    const initials = _getInitials(name);
+
+    const sidebarAvatar = document.querySelector('.sidebar-avatar');
+    if (sidebarAvatar) sidebarAvatar.textContent = initials;
+
+    const sidebarUserStrong = document.querySelector('.sidebar-user strong');
+    if (sidebarUserStrong) sidebarUserStrong.textContent = name;
+
+    const sidebarUserSpan = document.querySelector('.sidebar-user span');
+    if (sidebarUserSpan) sidebarUserSpan.textContent = reg;
+
+    const profileAvatarLg = document.querySelector('.profile-avatar-lg');
+    if (profileAvatarLg) profileAvatarLg.textContent = initials;
+
+    const profileName = document.querySelector('.profile-card h5');
+    if (profileName) profileName.textContent = name;
+
+    const profileDept = document.querySelector('.profile-card .text-muted');
+    if (profileDept) profileDept.textContent = dept;
+
+    const metaItems = document.querySelectorAll('.profile-meta-list li');
+    if (metaItems && metaItems.length >= 4) {
+      if (reg) metaItems[0].textContent = reg;
+      if (email) metaItems[1].textContent = email;
+      if (phone) metaItems[2].textContent = phone;
+      if (faculty) metaItems[3].textContent = faculty;
+    }
+
+    const topbarName = document.querySelector('.profile-btn .d-none.d-md-inline');
+    if (topbarName) topbarName.textContent = name;
+
+    const welcomeH2 = document.querySelector('.welcome-banner h2');
+    if (welcomeH2) welcomeH2.textContent = `Hello, ${name.split(' ')[0]} 👋`;
+  }
+
+  populateUser(registeredUser);
+
   // ---- SIDEBAR TOGGLE (mobile) ----
   const sidebar = document.getElementById('appSidebar');
   const overlay = document.getElementById('sidebarOverlay');
